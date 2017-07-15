@@ -5,7 +5,7 @@ from models import *
 from django.http import JsonResponse,HttpResponse
 import datetime
 from zhuangshiqi import *
-# Create your views here.
+from goods.models import GoodsInfo
 
 def register(request):
     context={'title':'注册','top':'0'}
@@ -67,7 +67,9 @@ def login_headle(request):
         if user[0].Upwd == upwd_sha1:   # 密码正确，登陆成功
             # return redirect('/user/') , 登陆成功，应直接跳转用户中心页面，但还有功能未完善，不能直接return
             # 1.记录当前的用户登陆状态（session），完成个人中心提取信息功能
+
             request.session['uid'] = user[0].id
+            print request.session.get('uid')
             request.session['uname'] = uname    #登陆成功后。置顶菜单栏显示用户名称
             # 2. 记住用户名
             path=request.session.get('url_path','/')    #中间件获取的地址
@@ -94,10 +96,27 @@ def loginout(request):  # 退出功能试图，清空session的缓存，直接�
     request.session.flush()
     return redirect('/user/login/')
 
+#用户在列表页点击购物车时用来判断是否登陆
+def islogin(request):
+    result = 0
+    if request.session.has_key('uid'):
+        result= 1
+
+    return JsonResponse({'result':result})
+
 @center_login
 def center(request):
+    # 获取在商品模块中detail试图中缓存的id_list，历史记录功能 ['','','','','']
+    id_list = request.COOKIES.get('id_list').split(',')
+    # 因为第一次没缓存数据则默认填充了空字符串，所以得pop掉
+    id_list.pop()
+    glist = []
+    # 遍历循环出该商品id对象，并导入商品模型类
+    for gid in id_list:
+            glist.append(GoodsInfo.objects.get(id=gid))
+
     user=UserInfo.objects.get(pk=request.session['uid'])
-    context={'title':'个人中心','user':user}
+    context={'title':'个人中心','user':user,'glist':glist}
     return render(request,'User/center.html',context)
 
 @center_login

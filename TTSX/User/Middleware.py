@@ -19,5 +19,6 @@ class MiddleWare:
                         '/user/login_headle/',
                         '/user/register/',
                         '/user/loginout/',
+                        '/user/islogin/'
                                 ]:
             request.session['url_path']=request.get_full_path()

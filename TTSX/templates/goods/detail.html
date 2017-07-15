@@ -1,0 +1,146 @@
+{%extends 'goods/base.html'%}
+
+{%block header%}
+	<script type="text/javascript">
+		$(function () {
+			$('#add_cart').click(function(){
+		    $.get('/user/islogin/',function (data) {
+				if(data.result){
+				    gid=$('#jilu_id').val();
+				    count=$('.num_show').val();
+				    $.get('/cart/add/',{'gid':gid,'count':count},function (data) {
+						if(data.isadd){
+//						    alert('购买成功');
+							var $add_x = $('#add_cart').offset().top;
+							var $add_y = $('#add_cart').offset().left;
+
+							var $to_x = $('#show_count').offset().top;
+							var $to_y = $('#show_count').offset().left;
+
+							$(".add_jump").css({'left': $add_y + 80, 'top': $add_x + 10, 'display': 'block'})
+								.stop()
+								.animate({'left': $to_y + 7, 'top': $to_x + 7}, "fast", function () {
+									$(".add_jump").fadeOut('fast', function () {
+									    $.get('/cart/count/',function (data) {
+                                            $('#show_count').html(data.cart_count);
+                                        });
+									});
+								});
+						}else{
+						    alert('购买失败，请稍候重试');
+						}
+                    });
+				}else{
+				    //未登陆，则跳转登陆页,当再次登陆时，会被记录跳转至/user/islogin/中，解决方案是将该路径添加到中间件中
+				    location.href='/user/login/';
+				 	 }
+            	});
+			});
+
+
+			//当输入文本框失去焦点的时候
+			$('#Tq').blur(function () {
+			    num = parseInt($(this).val());
+			    kucun = parseInt($('#kucun').val());
+
+				if(num < 1){
+			        num= 1;
+				}
+				if(num > kucun){
+				    num = kucun;
+				}
+				if(isNaN(num)){
+				    num = 1;
+				}
+				$(this).val(num)
+
+				// 计算价格
+				// 1.获取初始价格
+				price = parseFloat($('.show_pirze em').text())
+				// 运算
+				total = price*num
+				// 2. 放回去				最多保留两位小数
+				$('.total em').text(total.toFixed(2)+'元')
+            })
+
+			$('.add').click(function () {
+			    num = parseInt($('#Tq').val());
+				num++;
+				// 添加值并回调函数计算价格
+				$('#Tq').val(num).blur();
+            })
+			$('.minus').click(function () {
+			    num = parseInt($('#Tq').val());
+				num--;
+				$('#Tq').val(num).blur();
+            })
+        	})
+
+</script>
+
+{%endblock header%}
+
+
+{%block daohang%}
+	<div class="breadcrumb">
+		<a href="/">全部分类</a>
+		<span>></span>
+		<a href="/list{{g.gtype.id}}_1_1/">{{g.gtype.ttitle}}</a>
+		<span>></span>
+		<a href="#">商品详情</a>
+	</div>
+{%endblock daohang%}
+
+{%block detail%}
+	<div class="goods_detail_con clearfix">
+		<div class="goods_detail_pic fl"><img src="/static/{{g.gpic}}"></div>
+
+		<div class="goods_detail_list fr">
+			<h3>{{g.gtitle}}</h3>
+			<p>{{g.subtitle}}</p>
+			<div class="prize_bar">
+				<span class="show_pirze">¥<em>{{g.gprice}}</em></span>
+				<span class="show_unit">单  位：{{g.gunit}}</span>
+			</div>
+			<div class="goods_num clearfix">
+				<div class="num_name fl" >数 量：</div>
+				<div class="num_add fl">
+					<input type="hidden" id="jilu_id" value="{{g.id}}">
+					<input type="text" class="num_show fl" value="1" id="Tq">
+					<input type="hidden" id="kucun" value="{{g.gkucun}}">
+					<a href="javascript:;" class="add fr">+</a>
+					<a href="javascript:;" class="minus fr">-</a>	
+				</div> 
+			</div>
+			<div class="total">总价：<em>{{g.gprice}}元</em></div>
+			<div class="operate_btn">
+				<a href="javascript:;" class="buy_btn">立即购买</a>
+				<a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>				
+			</div>
+		</div>
+	</div>
+{%endblock detail%}
+
+
+
+		{%block right%}
+		<div class="r_wrap fr clearfix">
+			<ul class="detail_tab clearfix">
+				<li class="active">商品介绍</li>
+				<li>评论</li>
+			</ul>
+
+			<div class="tab_content">
+				<dl>
+					<dt>商品详情：</dt>
+					<dd>{{g.content|safe}} </dd>
+				</dl>
+			</div>
+		</div>
+		<div class="add_jump"></div>
+		{%endblock right%}
+
+
+
+
+

@@ -31,7 +31,7 @@
 					<span>|</span>
 					<a href="/user/">用户中心</a>
 					<span>|</span>
-					<a href="/user/cart/">我的购物车</a>
+					<a href="/cart/index/">我的购物车</a>
 					<span>|</span>
 					<a href="/user/order/">我的订单</a>
 				</div>
@@ -39,19 +39,52 @@
 		</div>
 	</div>
 
+{%if show|default:'0' == '0'%}
 	<div class="search_bar clearfix">
-		<a href="index.html" class="logo fl"><img src="/static/images/logo.png"></a>
+		<a href="/" class="logo fl"><img src="/static/images/logo.png"></a>
+		{%if order|default:'0' == '0'%}
 		<div class="sub_page_name fl">|&nbsp;&nbsp;&nbsp;&nbsp;用户中心</div>
-		<div class="search_con fr">
-			<input type="text" class="input_text fl" name="" placeholder="搜索商品">
-			<input type="button" class="input_btn fr" name="" value="搜索">
+		{%else%}
+		<div class="sub_page_name fl">|&nbsp;&nbsp;&nbsp;&nbsp;提交订单</div>
+		{%endif%}
+
+										<!--搜索并不需要真的提交，不需要使用post方式, 下列name=q,q是whoosh中用来接受数据-->
+		<div class="search_con fr"><form method="get" action="/search/" target="_blank">
+			<input type="text" class="input_text fl" name="q" placeholder="搜索商品">
+			<input type="button" class="input_btn fr"  value="搜索">
+		</form>
 		</div>
+
+		{%else%}
+		<div class="search_bar clearfix">
+		<a href="/" class="logo fl"><img src="/static/images/logo.png"></a>
+									<!--搜索并不需要真的提交，不需要使用post方式, 下列name=q,q是whoosh中用来接受数据-->
+		<div class="search_con fl"><form method="get" action="/search/" target="_blank">
+			<input type="text" class="input_text fl" name="q" placeholder="搜索商品">
+			<input type="button" class="input_btn fr"  value="搜索">
+		</form>
+		</div>
+		<div class="guest_cart fr">
+			<a href="/cart/index/" class="cart_name fl">我的购物车</a>
+			<div class="goods_count fl" id="show_count">0</div>
+
+			<script>
+				if($('.login_btn').text().indexOf('登陆') < 0){
+
+					$.get('/cart/count/',function (data) {
+						$('#show_count').text(data.cart_count)
+                	})
+				}
+			</script>
+		</div>
+		</div>
+
+		{%endif%}
 	</div>
 	{%endif%}
 
 
     {%block body%}{%endblock body%}
-
 
 	<div class="footer no-mp">
 		<div class="foot_link">
